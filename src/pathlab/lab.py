@@ -53,12 +53,15 @@ def table(results: dict[str, tuple[list[Path], Summary]]) -> str:
         f"{s.overshoot_rate:.0%}", f"{s.max_step_px:.1f}", f"{s.max_gap_ms:.1f}", f"{s.peak_at:.2f}",
     ) for name, (_, s) in results.items()]
     widths = [max(len(r[i]) for r in rows) for i in range(len(head))]
-    lines = ["  ".join(c.ljust(w) for c, w in zip(r, widths)).rstrip() for r in rows]
+    lines = ["  ".join(c.ljust(w) for c, w in zip(r, widths, strict=True)).rstrip() for r in rows]
     lines.insert(1, "  ".join("-" * w for w in widths))
     return "\n".join(lines)
 
 
-def fitts_table(law: FittsLaw = FittsLaw(), width: float = 24.0) -> str:
+DEFAULT_FITTS = FittsLaw()   # frozen dataclass: safe to share as a default
+
+
+def fitts_table(law: FittsLaw = DEFAULT_FITTS, width: float = 24.0) -> str:
     lines = [f"Fitts's law, a={law.a}s b={law.b}s, target {width:g}px wide:", "  distance px  ID bits  time s"]
     for d in (50, 100, 200, 400, 800, 1600):
         lines.append(f"  {d:>11}  {law.index_of_difficulty(d, width):>7.2f}  {law.movement_time(d, width):>6.3f}")
@@ -67,7 +70,7 @@ def fitts_table(law: FittsLaw = FittsLaw(), width: float = 24.0) -> str:
 
 def run(out: str = "pathlab.png", runs: int = 25, seed: int = 1,
         print_: Callable[[str], object] = print) -> int:
-    from .render import save_comparison   # imported here: drawing needs OpenCV, the stats don't
+    from .render import save_comparison  # imported here: drawing needs OpenCV, the stats don't
 
     results = compare(VARIANTS, runs, seed)
     print_(f"{runs} paths per variant, from {START.as_tuple()} to {END.as_tuple()}, seed {seed}:\n")

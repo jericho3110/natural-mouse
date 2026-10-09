@@ -14,10 +14,9 @@ from .automator import UIAutomator
 from .geometry import Point
 from .input.base import InputExecutor
 from .path.base import PathGenerator
-from .vision.base import Match, ScreenLocator
-
 from .plugins.base import ActionContext, Plugin, Region
 from .plugins.manager import PluginManager
+from .vision.base import Match, ScreenLocator
 
 
 class PluggableAutomator(UIAutomator):

@@ -289,6 +289,10 @@ made (not just what changed — the diff already shows what changed).
 4. Read `tests/test_automator.py` and the Martin Fowler TestDouble article (§6) together — see how `FakeInputExecutor` maps onto the vocabulary.
 5. Read §8 (`greenlet.h`) and §9 (concurrency concepts) back to back — the greenlet explanation is the motivating example, the concepts section is the vocabulary to describe what it's doing.
 6. Try the "extension exercises" at the bottom of `ARCHITECTURE.md` — actually write a `LinearPathGenerator` yourself before looking at how `BezierPathGenerator` does it differently.
+7. **The movement model**: read `MOVEMENT.md` §2-§6 with `path/curves.py`, `easing.py`, `jitter.py`, `fitts.py` open (each is under 100 lines of pure maths), then run `python src/main.py pathlab` and change one `VARIANTS` entry. Self-check: explain why tremor smoothing lowered "wobble" from 1.16 to 0.49 px.
+8. **One movement end to end**: follow `MOVEMENT.md` §9 from `automator.py` into `win32_executor.py`'s `SendInput` calls.
+9. **Extensions and plugins**: `EXTENSIONS_LEARNING.md` has its own study order.
+10. **Safety**: read `SECURITY.md`, then `tests/test_security_scan.py`: see how each check is proven by planting a bad line.
 
 ## 12. Books worth owning eventually (no rush)
 

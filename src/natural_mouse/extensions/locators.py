@@ -14,8 +14,8 @@ from collections.abc import Sequence
 import cv2
 import numpy as np
 
-from ..vision.base import Match, ScreenLocator
 from ..screen import grab_screen
+from ..vision.base import Match, ScreenLocator
 
 Region = tuple[int, int, int, int]
 

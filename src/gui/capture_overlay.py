@@ -12,7 +12,7 @@ in a screenshot taken as a result of the capture.
 from __future__ import annotations
 
 import tkinter as tk
-from typing import Callable
+from collections.abc import Callable
 
 RegionCallback = Callable[[tuple[int, int, int, int] | None], None]
 

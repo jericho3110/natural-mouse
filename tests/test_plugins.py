@@ -2,13 +2,16 @@ import unittest
 
 from natural_mouse import (
     ActionCancelled,
+    BezierPathGenerator,
+    Match,
     PluggableAutomator,
     Plugin,
     PluginManager,
+    Point,
     RegionGuardPlugin,
     StatsPlugin,
+    UIAutomator,
 )
-from natural_mouse import BezierPathGenerator, Match, Point, UIAutomator
 from natural_mouse.input import FakeInputExecutor
 from tests.ext_fakes import FakeScreenLocator
 

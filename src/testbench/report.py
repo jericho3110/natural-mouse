@@ -72,7 +72,7 @@ def summarize_moves(events: list[dict]) -> MoveSummary:
     if not moves:
         return MoveSummary(0, 0.0, 0.0, 0.0)
     path = sum(
-        math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(moves, moves[1:])
+        math.hypot(b["x"] - a["x"], b["y"] - a["y"]) for a, b in zip(moves, moves[1:], strict=False)
     )
     first, last = moves[0], moves[-1]
     straight = math.hypot(last["x"] - first["x"], last["y"] - first["y"])
@@ -90,7 +90,7 @@ def summarize_wheel(before: list[dict], during: list[dict]) -> WheelSummary:
     """`before` = every event up to the step, `during` = the step's events
     (including the smooth-scroll tail after the last wheel event)."""
     wheels = of_type(during, "wheel")
-    gaps = [b["t"] - a["t"] for a, b in zip(wheels, wheels[1:])]
+    gaps = [b["t"] - a["t"] for a, b in zip(wheels, wheels[1:], strict=False)]
     gap_stats = (min(gaps), sum(gaps) / len(gaps), max(gaps)) if gaps else None
     start = last_scroll_y(before)
     return WheelSummary(

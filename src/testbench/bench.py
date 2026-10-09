@@ -21,9 +21,9 @@ from __future__ import annotations
 
 import time
 import webbrowser
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
 from natural_mouse import Point, UIAutomator
 

@@ -7,15 +7,18 @@ import cv2
 import numpy as np
 
 from natural_mouse import (
+    BezierPathGenerator,
     FailSafeExecutor,
     FailSafeTriggered,
     FallbackLocator,
     FittsPathGenerator,
+    Match,
+    MovementProfile,
     MultiScaleTemplateLocator,
+    Point,
     RecordingPathGenerator,
     RetryLocator,
 )
-from natural_mouse import BezierPathGenerator, Match, MovementProfile, Point
 from tests.ext_fakes import FakeScreenLocator, PathWalkingExecutor
 
 MATCH = Match(10, 10, 5, 5, 0.9)

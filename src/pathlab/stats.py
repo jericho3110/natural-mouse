@@ -62,10 +62,11 @@ def measure(start: Point, end: Point, path: Path) -> PathStats:
     def across(p):  # distance off the line (signed)
         return -(p[0] - start.x) * uy + (p[1] - start.y) * ux
 
-    steps = [math.dist(a, b) for a, b in zip(pts, pts[1:])]
+    steps = [math.dist(a, b) for a, b in zip(pts, pts[1:], strict=False)]
     # Wobble: how far each point is from the average of its neighbours
     # (a smooth curve is close to that average; jitter isn't).
-    wobble = [math.dist(b, ((a[0] + c[0]) / 2, (a[1] + c[1]) / 2)) for a, b, c in zip(pts, pts[1:], pts[2:])]
+    triples = zip(pts, pts[1:], pts[2:], strict=False)   # each point with its two neighbours
+    wobble = [math.dist(b, ((a[0] + c[0]) / 2, (a[1] + c[1]) / 2)) for a, b, c in triples]
     speed = speeds(start, path)
     duration = sum(p.delay for p in path)
     peak_t = max(speed, key=lambda s: s[1])[0] if speed else 0.0

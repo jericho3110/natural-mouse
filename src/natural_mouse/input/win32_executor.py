@@ -101,7 +101,7 @@ class Win32InputExecutor(InputExecutor):
                 raise ValueError("path_generator is required when moving to a target.")
             self.move_to(target, path_generator)
         self._send_click(button_down=True)
-        time.sleep(random.uniform(*hold_range))
+        time.sleep(random.uniform(*hold_range))  # noqa: S311 - timing variety, not security
         self._send_click(button_down=False)
 
     def scroll(
@@ -114,7 +114,7 @@ class Win32InputExecutor(InputExecutor):
         notches = self._split_into_steps(amount, steps)
         for notch in notches:
             self._send_wheel(notch)
-            time.sleep(random.uniform(*step_delay_range))
+            time.sleep(random.uniform(*step_delay_range))  # noqa: S311 - timing variety, not security
 
     @staticmethod
     def _split_into_steps(amount: int, steps: int) -> list[int]:

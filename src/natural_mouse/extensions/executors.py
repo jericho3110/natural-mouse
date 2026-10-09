@@ -4,11 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from ..errors import FailSafeTriggered
 from ..geometry import Point
 from ..input.base import InputExecutor
 from ..path.base import Path, PathGenerator, PathPoint
-
-from ..errors import FailSafeTriggered
 
 
 class FailSafeExecutor(InputExecutor):

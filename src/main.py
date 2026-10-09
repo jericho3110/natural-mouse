@@ -73,7 +73,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         required=True,
         help="Wheel notches: positive scrolls up, negative scrolls down.",
     )
-    scroll_parser.add_argument("--steps", type=int, default=5, help="Number of smaller nudges to split the scroll into.")
+    scroll_parser.add_argument("--steps", type=int, default=5,
+                               help="Number of smaller nudges to split the scroll into.")
     scroll_parser.add_argument(
         "--at",
         type=int,
@@ -169,7 +170,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "testbench":
         return run_testbench(args)
     if args.command == "pathlab":
-        from pathlab import run as run_pathlab   # only loaded for this command
+        from pathlab import run as run_pathlab  # only loaded for this command
         return run_pathlab(out=args.out, runs=args.runs, seed=args.seed)
 
     automator = build_automator()

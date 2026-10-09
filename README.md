@@ -199,6 +199,19 @@ runnable example: `python examples/click_with_plugins.py templates/target.png --
 python -m unittest discover -s tests -t .
 ```
 
+### The check gate (before every commit)
+
+```powershell
+pip install -e ".[dev]"            # once: adds ruff and pip-audit
+python scripts/check.py            # lint, tests, links, security scan
+python scripts/check.py --offline  # the same without the network (no web links, no pip-audit)
+```
+
+It prints `all checks passed` and exits with 0, or names what failed
+and exits with 1. CI runs it on Windows for every push. What the
+security scan checks, and the review findings:
+[docs/SECURITY.md](docs/SECURITY.md).
+
 (`-t .` sets the project root as the top-level directory, which is what
 makes `tests/__init__.py` add `src/` to the path before any test imports
 `natural_mouse` or `gui` — see that file for why the plain `discover tests`
@@ -248,6 +261,12 @@ src/                            # all the code lives here — "src layout"
     render.py                    # draw the comparison (OpenCV)
     lab.py                       # the variants; run(...)
 examples/click_with_plugins.py  # extensions + plugins, runnable (--dry-run)
+scripts/
+  check.py                      # the check gate: lint, tests, links, security
+  check_links.py                # every link in the docs
+  security_scan.py              # pip-audit, dangerous patterns, no secrets/personal data
+.github/workflows/ci.yml        # CI: the gate on Windows, every push
+ruff.toml                       # linter rules
 LICENSE                         # MIT
 tests/                          # unit tests, separate from src/ (unittest, no extra dependencies)
 templates/                      # your own reference images (gitignored)
@@ -261,7 +280,10 @@ docs/                           # architecture + study guides — see below
 - [docs/PROGRAMMING_ROADMAP.md](docs/PROGRAMMING_ROADMAP.md) — the broader map of general, Python-specific, and other-language concepts worth knowing beyond what this particular project happens to use.
 - [docs/MOVEMENT.md](docs/MOVEMENT.md) — how a movement is made: curves, easing, micro-jitter, Fitts's law, overshoot, the path lab and its measured results.
 - [docs/EXTENSIONS_AND_PLUGINS.md](docs/EXTENSIONS_AND_PLUGINS.md) and [docs/EXTENSIONS_LEARNING.md](docs/EXTENSIONS_LEARNING.md) — extensions vs plugins, the patterns used (Decorator, hooks, entry points), and a study guide.
-- [docs/SECURITY.md](docs/SECURITY.md) — what the library can and can't do, the test bench's defences, and how to report a problem.
+- [docs/SECURITY.md](docs/SECURITY.md) — what the library can and can't do, the automated checks, the review findings, and how to report a problem.
+- [docs/LIBRARIES_AND_BUILTINS.md](docs/LIBRARIES_AND_BUILTINS.md) — every module, library, built-in, dunder and decorator used: where, why, alternatives.
+- [docs/GLOSSARY.md](docs/GLOSSARY.md) — every concept in one table, linked to where it's explained.
+- [docs/FILE_TYPES.md](docs/FILE_TYPES.md) — every kind of file here, and why it exists or is ignored.
 - [CHANGELOG.md](CHANGELOG.md) — what changed, version by version.
 - [docs/TESTBENCH.md](docs/TESTBENCH.md) — the live test bench: how to run it, how to read its results, how it's built, its security, and what it found (the DPI-scaling fix).
 - [docs/SOFTWARE_ARCHITECTURE_STYLES.md](docs/SOFTWARE_ARCHITECTURE_STYLES.md) — why structure matters more as a project grows, and a tour of the named architecture styles (monolith, layered, MVC/MVP/MVVM, hexagonal/Clean, event-driven, microservices, serverless, monorepo vs. polyrepo).

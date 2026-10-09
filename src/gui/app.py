@@ -104,9 +104,12 @@ class App:
         button_row.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(8, 0))
         button_row.columnconfigure((0, 1, 2), weight=1)
 
-        ttk.Button(button_row, text="New Target…", command=self._on_new_target).grid(row=0, column=0, sticky="ew", padx=(0, 4))
-        ttk.Button(button_row, text="Click Selected", command=self._on_click_selected).grid(row=0, column=1, sticky="ew", padx=4)
-        ttk.Button(button_row, text="Delete Selected", command=self._on_delete_selected).grid(row=0, column=2, sticky="ew", padx=(4, 0))
+        ttk.Button(button_row, text="New Target…", command=self._on_new_target).grid(
+            row=0, column=0, sticky="ew", padx=(0, 4))
+        ttk.Button(button_row, text="Click Selected", command=self._on_click_selected).grid(
+            row=0, column=1, sticky="ew", padx=4)
+        ttk.Button(button_row, text="Delete Selected", command=self._on_delete_selected).grid(
+            row=0, column=2, sticky="ew", padx=(4, 0))
 
     def _build_scroll_section(self, parent: ttk.Frame) -> None:
         section = ttk.LabelFrame(parent, text="Scroll", style="Section.TLabelframe", padding=8)

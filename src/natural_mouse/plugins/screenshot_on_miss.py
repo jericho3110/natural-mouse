@@ -8,13 +8,13 @@ wasn't visible.
 
 from __future__ import annotations
 
+import re
 import time
 from pathlib import Path as FsPath
 
 import cv2
 
 from ..screen import grab_screen
-
 from .base import ActionContext, Plugin
 
 
@@ -28,8 +28,18 @@ class ScreenshotOnMissPlugin(Plugin):
         if ctx.match is not None:
             return
         self.directory.mkdir(parents=True, exist_ok=True)
-        stem = FsPath(ctx.query or "query").stem
-        path = self.directory / f"{time.strftime('%Y%m%d-%H%M%S')}_{stem}.png"
-        cv2.imwrite(str(path), grab_screen(ctx.region))
+        path = self.directory / f"{time.strftime('%Y%m%d-%H%M%S')}_{safe_stem(ctx.query)}.png"
+        if not cv2.imwrite(str(path), grab_screen(ctx.region)):   # imwrite returns False instead of raising
+            raise OSError(f"couldn't save the miss screenshot to {path}")
         ctx.extras["miss_screenshot"] = path
         self.saved.append(path)
+
+
+def safe_stem(query: str | None, limit: int = 60) -> str:
+    """A file-name-safe version of the query, e.g. 'templates/Save button.png'
+    -> 'Save_button', '#ff00ff' -> 'ff00ff'. Only letters, digits, '-' and
+    '_' survive, so the name can't contain a folder, a drive, or a
+    character Windows refuses (: * ? " < > |), and it's never empty."""
+    stem = FsPath(query or "").stem
+    cleaned = re.sub(r"[^A-Za-z0-9_-]+", "_", stem).strip("_")[:limit]
+    return cleaned or "query"

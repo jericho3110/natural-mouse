@@ -15,8 +15,11 @@ shows how to pick them, and shows what the **path lab** measured.
 - [6. Overshoot and correction](#6-overshoot-and-correction)
 - [7. Is it curved, distorted, and continuous?](#7-is-it-curved-distorted-and-continuous)
 - [8. The path lab](#8-the-path-lab)
-- [9. Design decisions](#9-design-decisions)
-- [10. Exercises](#10-exercises)
+  - [8.1 How `pathlab.png` is made](#81-how-pathlabpng-is-made)
+  - [8.2 What each number means](#82-what-each-number-means)
+- [9. One movement, end to end](#9-one-movement-end-to-end)
+- [10. Design decisions](#10-design-decisions)
+- [11. Exercises](#11-exercises)
 - [References](#references)
 
 ## 1. Quick start
@@ -189,7 +192,99 @@ an idea, add a `MovementProfile` to `VARIANTS` in
 [lab.py](../src/pathlab/lab.py). To see how the *browser* receives a
 movement, use the live test bench ([TESTBENCH.md](TESTBENCH.md)).
 
-## 9. Design decisions
+### 8.1 How `pathlab.png` is made
+
+The picture in the README and above comes from the same command, in
+four steps. Nothing touches the real mouse or screen.
+
+```text
+lab.run(out, runs=25, seed=1)
+  1. generate   for each variant in VARIANTS (5 MovementProfiles):
+                  rng = random.Random(seed)                  # same seed -> same paths
+                  BezierPathGenerator(profile, rng).generate(START, END) x 25
+                START = (150, 450), END = (850, 150): a 760 px move up and right
+  2. measure    stats.measure(START, END, path) for every path -> PathStats
+                stats.summarize(...) per variant -> Summary (averages, worst cases)
+  3. print      lab.table(...) and lab.fitts_table()          # the console tables
+  4. draw       render.save_comparison(results, START, END, out)
+```
+
+Step 4, the drawing, in `src/pathlab/render.py`:
+
+| Step | OpenCV / NumPy call | Why |
+| --- | --- | --- |
+| A blank canvas | `np.full((height, width, 3), BG, np.uint8)` | an OpenCV image *is* a NumPy array of rows × columns × 3 colour channels (blue, green, red) |
+| Fit every path in a panel | `_bounds(...)`, then one `scale` for all rows | the same scale everywhere, so the rows can be compared by eye |
+| Draw each path | `cv2.polylines(overlay, [points], False, colour, 1, cv2.LINE_AA)` | connects the path's positions; `LINE_AA` = smooth (anti-aliased) lines |
+| Make it see-through | `cv2.addWeighted(overlay, 0.35, img, 0.65, 0, img)` | draws at 35% opacity: where many of the 25 paths overlap the colour builds up, so you see the *spread* of the paths, not just one |
+| Start and end marks | `cv2.circle` (start), two `cv2.line`s (the end's x) | |
+| Speed panel | for each step: time from start vs `distance / delay`, drawn the same way | the same `vmax` and `tmax` for every row, so heights and lengths compare fairly (that's why the Fitts row looks longer) |
+| Labels | `cv2.putText(..., cv2.FONT_HERSHEY_SIMPLEX, ...)` | OpenCV's built-in font, no font files needed |
+| Save | `cv2.imwrite(out, img)`; raises `OSError` if it returns `False` | `imwrite` reports failure by returning `False`, not by raising |
+
+The README's copy (`docs/images/pathlab.png`) is the same picture (same
+seed) shrunk to 900 px wide with `cv2.resize(..., interpolation=cv2.INTER_AREA)`
+(the best method for shrinking: it averages pixels instead of skipping
+them) and saved with `cv2.IMWRITE_PNG_COMPRESSION, 9`: 737 KB → 353 KB.
+To re-create it:
+
+```powershell
+python src/main.py pathlab --out docs/images/full.png    # then shrink as above
+```
+
+### 8.2 What each number means
+
+All from [src/pathlab/stats.py](../src/pathlab/stats.py), pure functions:
+
+| Column | How it's computed | Answers |
+| --- | --- | --- |
+| time s | sum of the path's delays | how long the move takes |
+| curve px (bow) | the largest distance of any position from the straight start→end line (a cross product with the line's unit vector) | curved? |
+| straight | path length ÷ straight distance; 1.000 = a straight line | curved? |
+| wobble px | average distance of each position from the midpoint of its two neighbours: 0 on a smooth curve, bigger with jitter | distorted? |
+| overshoot | share of paths whose furthest point *along* the line goes > 0.5 px past the end | distorted? |
+| max step px | the biggest jump between two consecutive positions (worst over all paths) | continuous? |
+| max gap ms | the longest delay between two positions (worst over all paths) | continuous? |
+| peak at | when the fastest step happens, as a fraction of the duration | bell-shaped speed? |
+
+## 9. One movement, end to end
+
+What happens between your call and the cursor arriving:
+
+```text
+automator.find_and_click("#ff00ff")                           automator.py
+  1. locator.locate(query) -> Match(x, y, width, height)      vision/color_locator.py (screen.py: mss screenshot)
+  2. match.random_point(center_bias=0.6)                      vision/base.py: a point near the centre, not exactly on it
+  3. executor.click(target, path_generator, hold_range)       input/win32_executor.py
+       move_to(target):
+         origin = GetCursorPos()
+         path = path_generator.generate(origin, target)       path/bezier.py:
+             overshoot?  -> aim past the target (6)
+             controls    = curves.control_points(...)         (2)
+             ease        = easing.easing(name, k)             (3)
+             steps       = max(8, distance/100 * 18)
+             duration    = Fitts's law or duration_range      (5)
+             wobble      = jitter.micro_jitter(steps, ...)    (4)
+             for i in 1..steps: point_on(curve, ease(i/steps)) + wobble[i]
+             overshoot?  -> append a short correction path
+         for each PathPoint:
+             SendInput(absolute move to round(x), round(y))   # one OS mouse event
+             sleep(point.delay)                               # step_time = duration / steps
+       SendInput(left button down); sleep(random hold 60-160 ms); SendInput(left button up)
+```
+
+- `SendInput` takes *absolute* coordinates scaled to 0..65535 across
+  the screen, so `_send_absolute_move` divides by the screen size first.
+  The process is DPI-aware (set when `Win32InputExecutor` is created),
+  so the screen size and screenshot pixels are the same units.
+- Positions are spaced equally in **time** (`step_time`); the easing
+  decides how far apart they are in space. That's what creates the
+  bell-shaped speed.
+- With `FailSafeExecutor` wrapped around the executor, the mouse's
+  position is checked between points, and the move stops if you grab
+  the mouse ([EXTENSIONS_AND_PLUGINS.md](EXTENSIONS_AND_PLUGINS.md)).
+
+## 10. Design decisions
 
 | Decision | Alternatives | Why | Cost |
 | --- | --- | --- | --- |
@@ -200,7 +295,7 @@ movement, use the live test bench ([TESTBENCH.md](TESTBENCH.md)).
 | Taper jitter to zero at the ends | clamp the last point only | no kink right before landing | slightly less wobble near the ends |
 | `TYPE_CHECKING` import of `FittsLaw` in geometry.py | a module-level import | avoids an import cycle (path → geometry → path) | the name only exists for type checkers |
 
-## 10. Exercises
+## 11. Exercises
 
 1. Add a variant with `easing="linear"` to the path lab. Where does its
    speed peak, and why does it look robotic?

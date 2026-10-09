@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "natural-mouse"
-version = "0.2.0"
+version = "0.2.1"
 description = "Human-like mouse movement (curves, easing, jitter, overshoot, Fitts's law), clicking and scrolling for Windows, with extensions and plugins."
 requires-python = ">=3.10"
 dependencies = [
@@ -16,6 +16,10 @@ dependencies = [
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
+
+[project.optional-dependencies]
+# Development tools for the check gate (scripts/check.py): pip install -e ".[dev]"
+dev = ["ruff>=0.6", "pip-audit>=2.7"]
 
 # The built-in plugins, advertised the same way another package would
 # advertise its own (see plugins/manager.py, PluginManager.load_entry_points).

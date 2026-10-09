@@ -8,12 +8,14 @@ from ..geometry import Point
 from ..path.base import PathGenerator
 from .base import InputExecutor
 
+ORIGIN = Point(0, 0)   # Point is frozen (immutable), so one shared default is safe
+
 
 class FakeInputExecutor(InputExecutor):
     """Records every call it receives in `self.calls` and tracks a fake
     cursor position, without ever touching the real OS cursor."""
 
-    def __init__(self, start_position: Point = Point(0, 0)):
+    def __init__(self, start_position: Point = ORIGIN):
         self._position = start_position
         self.calls: list[tuple] = []
 

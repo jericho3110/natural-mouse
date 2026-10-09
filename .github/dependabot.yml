@@ -1,0 +1,12 @@
+# Dependabot opens pull requests when a dependency (or a GitHub Action)
+# has a new version or a security fix.
+version: 2
+updates:
+  - package-ecosystem: pip                # opencv-python, numpy, mss lower bounds (pyproject.toml)
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: github-actions     # actions/checkout, actions/setup-python in ci.yml
+    directory: /
+    schedule:
+      interval: monthly

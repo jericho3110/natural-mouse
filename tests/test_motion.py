@@ -51,7 +51,7 @@ class TestEasing(unittest.TestCase):
             self.assertAlmostEqual(ease(0), 0, msg=name)
             self.assertAlmostEqual(ease(1), 1, msg=name)
             values = [ease(i / 100) for i in range(101)]
-            self.assertTrue(all(b >= a - 1e-12 for a, b in zip(values, values[1:])), name)
+            self.assertTrue(all(b >= a - 1e-12 for a, b in zip(values, values[1:], strict=False)), name)
 
     def test_logistic_is_slow_at_the_ends_fast_in_the_middle(self):
         # Speed ~ slope. Steeper k = slower start and faster middle.
@@ -102,7 +102,7 @@ class TestMicroJitter(unittest.TestCase):
         def roughness(smoothing):
             o = micro_jitter(400, 2.0, smoothing, random.Random(5))
             mid = o[100:300]                                   # away from the tapered ends
-            return statistics.mean(abs(b[0] - a[0]) for a, b in zip(mid, mid[1:]))
+            return statistics.mean(abs(b[0] - a[0]) for a, b in zip(mid, mid[1:], strict=False))
         self.assertLess(roughness(0.85), roughness(0.0) / 2)
 
     def test_amplitude_is_kept_after_smoothing(self):
@@ -142,7 +142,7 @@ class TestGenerator(unittest.TestCase):
 
     def test_logistic_peak_speed_is_mid_movement(self):
         path = list(self.path(2, easing="logistic", logistic_steepness=12, jitter_px=0, overshoot_chance=0))
-        steps = [math.dist((a.x, a.y), (b.x, b.y)) for a, b in zip(path, path[1:])]
+        steps = [math.dist((a.x, a.y), (b.x, b.y)) for a, b in zip(path, path[1:], strict=False)]
         peak = steps.index(max(steps)) / len(steps)
         self.assertTrue(0.35 < peak < 0.65, peak)
         self.assertLess(steps[0], max(steps) / 4)              # slow start

@@ -1,0 +1,32 @@
+# Ruff: the linter. Same rule sets as the mr-factory workspace.
+#   ruff check .            # report problems
+#   ruff check . --fix      # fix the ones that are safe to fix automatically
+# Why each rule set is on: docs/LIBRARIES_AND_BUILTINS.md, "Development tools".
+
+line-length = 120
+target-version = "py310"     # matches requires-python in pyproject.toml
+
+[lint]
+select = [
+    "E", "W",   # pycodestyle: PEP 8 layout
+    "F",        # pyflakes: unused imports/variables, undefined names
+    "I",        # isort: import order (stdlib, third-party, local)
+    "B",        # flake8-bugbear: likely bugs (mutable defaults, ...)
+    "UP",       # pyupgrade: modern syntax for the target Python
+    "SIM",      # flake8-simplify: simpler equivalent code
+    "S",        # flake8-bandit: security checks
+]
+ignore = [
+    "SIM108",   # ternaries aren't always clearer than if/else
+]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "S101",   # unittest uses self.assert*, but plain asserts in fakes are fine
+    "S311",   # seeded random.Random() makes tests repeatable; nothing secret is generated
+    "S105", "S106",   # fixed test tokens ("secret-token") are test data, not secrets
+    "S310",   # tests open URLs of the bench's own 127.0.0.1 server, built from http:// only
+]
+
+[lint.isort]
+known-first-party = ["natural_mouse", "gui", "testbench", "pathlab", "tests"]

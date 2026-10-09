@@ -51,6 +51,17 @@ src/natural_mouse/plugins/               Plugin, PluginManager, Logging/Stats/Re
 src/pathlab/                             path lab: stats.py (pure), render.py (OpenCV), lab.py (variants, run)
 examples/click_with_plugins.py           extensions + plugins example (--dry-run)
 LICENSE                                  MIT
+ruff.toml                                linter rules
+scripts/check.py                         the check gate: lint, tests, links, security (exit code decides)
+scripts/check_links.py                   checks every doc link
+scripts/security_scan.py                 pip-audit + dangerous patterns + no secrets/personal data
+.github/workflows/ci.yml                 CI on Windows: the gate + pip-audit
+.github/dependabot.yml                   dependency/action update PRs
+docs/LIBRARIES_AND_BUILTINS.md           every module/library/built-in/dunder/decorator used
+docs/GLOSSARY.md                         every concept, linked
+docs/FILE_TYPES.md                       every file type and why
+tests/test_security_scan.py              proves each scanner check fires (planted lines)
+tests/test_screenshot_on_miss.py         safe screenshot names; failed saves raise
 docs/MOVEMENT.md                         how a movement is made; the path lab
 docs/EXTENSIONS_AND_PLUGINS.md           extensions vs plugins (formerly mouse-ext's ARCHITECTURE)
 docs/EXTENSIONS_LEARNING.md              study guide for extensions/plugins

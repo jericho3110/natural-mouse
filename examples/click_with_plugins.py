@@ -16,20 +16,18 @@ import sys
 
 from natural_mouse import (
     ActionCancelled,
+    BezierPathGenerator,
     FailSafeExecutor,
     FallbackLocator,
     FittsPathGenerator,
     LoggingPlugin,
+    MovementProfile,
     MultiScaleTemplateLocator,
     PluggableAutomator,
     RecordingPathGenerator,
     RetryLocator,
     ScreenshotOnMissPlugin,
     StatsPlugin,
-)
-from natural_mouse import (
-    BezierPathGenerator,
-    MovementProfile,
     TemplateMatchLocator,
     Win32InputExecutor,
 )

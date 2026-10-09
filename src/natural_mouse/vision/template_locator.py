@@ -52,7 +52,7 @@ class TemplateMatchLocator(ScreenLocator):
 
         locations = np.where(result >= confidence)
         matches: list[Match] = []
-        for pt_y, pt_x in zip(*locations):
+        for pt_y, pt_x in zip(*locations, strict=True):   # np.where: equal-length row/column arrays
             candidate = Match(int(pt_x + offset_x), int(pt_y + offset_y), w, h, float(result[pt_y, pt_x]))
             if not any(
                 abs(candidate.x - m.x) < w // 2 and abs(candidate.y - m.y) < h // 2

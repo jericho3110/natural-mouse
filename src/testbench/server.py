@@ -19,8 +19,8 @@ import json
 import secrets
 import threading
 import time
+from collections.abc import Callable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Callable
 from urllib.parse import parse_qs, urlsplit
 
 EVENT_TYPES = frozenset({"ready", "focus", "mousemove", "wheel", "scroll", "click"})

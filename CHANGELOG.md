@@ -6,6 +6,31 @@ uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-09
+
+### Fixed
+
+- `ScreenshotOnMissPlugin`: file names are made safe (`safe_stem`) and a
+  failed save raises `OSError` instead of being recorded as saved
+  (colour queries like `#ff00ff`, or `:`/`*`/`?`, made Windows refuse
+  the name and `cv2.imwrite` fail silently).
+
+### Added
+
+- The check gate `scripts/check.py` (lint, tests, links, security),
+  `scripts/security_scan.py` (pip-audit, dangerous patterns, invariants;
+  proven by tests/test_security_scan.py), `scripts/check_links.py`.
+- GitHub Actions CI on Windows and Dependabot; `ruff.toml`; the `[dev]`
+  extra (`pip install -e ".[dev]"`).
+- Docs: LIBRARIES_AND_BUILTINS, GLOSSARY, FILE_TYPES; MOVEMENT.md §8.1
+  (how pathlab.png is made), §8.2 (what each number means), §9 (one
+  movement end to end); SECURITY.md automated checks and review findings.
+
+### Changed
+
+- Lint clean under the workspace's rule sets: `zip(..., strict=)` made
+  explicit, shared defaults are named frozen constants.
+
 ## [0.2.0] - 2026-10-09
 
 ### Added

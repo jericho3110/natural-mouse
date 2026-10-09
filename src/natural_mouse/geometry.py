@@ -22,16 +22,16 @@ class Point:
     x: float
     y: float
 
-    def distance_to(self, other: "Point") -> float:
+    def distance_to(self, other: Point) -> float:
         return math.hypot(other.x - self.x, other.y - self.y)
 
-    def angle_to(self, other: "Point") -> float:
+    def angle_to(self, other: Point) -> float:
         return math.atan2(other.y - self.y, other.x - self.x)
 
     def as_tuple(self) -> tuple[float, float]:
         return self.x, self.y
 
-    def __add__(self, other: "Point") -> "Point":
+    def __add__(self, other: Point) -> Point:
         return Point(self.x + other.x, self.y + other.y)
 
 
