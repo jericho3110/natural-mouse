@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "natural-mouse"
+version = "0.2.0"
+description = "Human-like mouse movement (curves, easing, jitter, overshoot, Fitts's law), clicking and scrolling for Windows, with extensions and plugins."
+requires-python = ">=3.10"
+dependencies = [
+    "opencv-python>=4.9",
+    "numpy>=1.26",
+    "mss>=9.0",
+]
+
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+
+# The built-in plugins, advertised the same way another package would
+# advertise its own (see plugins/manager.py, PluginManager.load_entry_points).
+[project.entry-points."natural_mouse.plugins"]
+logging = "natural_mouse.plugins:LoggingPlugin"
+stats = "natural_mouse.plugins:StatsPlugin"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["natural_mouse*"]

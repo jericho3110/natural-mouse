@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>natural_mouse test bench</title>
+<style>
+  /* The two targets are solid #ff00ff (magenta) and #00ffff (cyan) with
+     no border, rounding, shadow or text, so ColorLocator sees a clean
+     rectangle. Nothing else on the page may use those colours. */
+  :root { --bg: #f4f4f2; --card: #ffffff; --ink: #222; --muted: #666; --line: #ddd; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.5 system-ui, sans-serif; }
+  header { position: sticky; top: 0; background: #2b2b2b; color: #eee;
+           padding: 8px 16px; font-size: 13px; z-index: 1; }
+  main { max-width: 640px; margin: 0 auto; padding: 16px; }
+  .card { background: var(--card); border: 1px solid var(--line);
+          border-radius: 6px; padding: 12px 16px; margin: 12px 0; }
+  .card p { margin: 4px 0 0; color: var(--muted); }
+  .target-row { display: flex; align-items: center; gap: 16px; margin: 24px 0; }
+  .target { width: 240px; height: 80px; border: 0; padding: 0; cursor: pointer; }
+  #start { background: #ff00ff; }
+  #finish { background: #00ffff; }
+</style>
+</head>
+<body>
+<header id="status">waiting...</header>
+<main>
+  <h1>natural_mouse test bench</h1>
+  <p>This page is driven by <code>python src/main.py testbench</code>.
+     It records the mouse, wheel, scroll and click events it receives and
+     sends them to the bench on this computer (127.0.0.1 only). Move the
+     mouse yourself to stop the run.</p>
+  <div class="target-row"><button id="start" class="target" aria-label="start target"></button>
+    <span>start target</span></div>
+  <div id="feed"></div>
+  <div class="target-row"><button id="finish" class="target" aria-label="finish target"></button>
+    <span>finish target</span></div>
+  <div style="height: 60vh"></div>
+</main>
+<script>
+"use strict";
+const token = new URLSearchParams(location.search).get("t") || "";
+const queue = [];
+const counts = { mousemove: 0, wheel: 0, click: 0 };
+history.scrollRestoration = "manual";  // always start at the top
+window.scrollTo(0, 0);
+
+// Filler cards so there is something to scroll past.
+const feed = document.getElementById("feed");
+for (let i = 1; i <= 24; i++) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = "<strong>Card " + i + "</strong><p>Filler text so the page is long enough to scroll.</p>";
+  feed.appendChild(card);
+}
+
+function record(type, extra) {
+  queue.push(Object.assign({ type: type, t: performance.now(), scrollY: window.scrollY }, extra));
+  if (type in counts) counts[type]++;
+}
+
+function showStatus() {
+  document.getElementById("status").textContent =
+    "moves " + counts.mousemove + " | wheel " + counts.wheel +
+    " | clicks " + counts.click + " | scrollY " + Math.round(window.scrollY);
+}
+
+// Browsers fire mousemove at most about once per frame, so this sees fewer
+// moves than SendInput sent; the bench reports both counts honestly.
+addEventListener("mousemove", e => record("mousemove", { x: e.clientX, y: e.clientY }), { passive: true });
+addEventListener("wheel", e => record("wheel", { deltaY: e.deltaY, deltaMode: e.deltaMode }), { passive: true });
+
+let scrollPending = false;
+addEventListener("scroll", () => {
+  if (scrollPending) return;
+  scrollPending = true;
+  requestAnimationFrame(() => { scrollPending = false; record("scroll", {}); });
+}, { passive: true });
+
+addEventListener("click", e => {
+  const el = e.target.closest(".target");
+  const info = { x: e.clientX, y: e.clientY, target: el ? el.id : null };
+  if (el) {
+    const r = el.getBoundingClientRect();
+    // Offset from the centre as a fraction of half the size: 0 = dead
+    // centre, +-1 = on the edge.
+    info.dx = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
+    info.dy = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
+  }
+  record("click", info);
+});
+
+function flush() {
+  showStatus();
+  if (!queue.length) return;
+  const batch = queue.splice(0, 500);
+  fetch("/events?t=" + encodeURIComponent(token), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(batch),
+  }).catch(() => {});
+}
+setInterval(flush, 150);
+
+// The bench waits for "focus" before touching the mouse: Windows won't let
+// a background program bring this window to the front, so you click it.
+addEventListener("focus", () => record("focus", {}));
+record("ready", { dpr: window.devicePixelRatio, innerW: innerWidth, innerH: innerHeight,
+                  focused: document.hasFocus() });
+</script>
+</body>
+</html>

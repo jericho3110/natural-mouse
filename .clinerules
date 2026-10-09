@@ -1,0 +1,119 @@
+# Project map: natural_mouse
+
+Read this before answering. It lists every real file in this project. Do
+not guess at file names that aren't listed here (e.g. there is no
+setup.py and no Natural.py) — if a file isn't in this list, it does not
+exist yet.
+
+## File list
+
+```text
+pyproject.toml                       package metadata + dependencies; `pip install -e .` makes natural_mouse importable from anywhere
+README.md                            usage docs
+docs/ARCHITECTURE.md                 design/architecture docs
+docs/LEARNING_RESOURCES.md           study guide tied to this codebase
+docs/PROGRAMMING_ROADMAP.md          broader programming concepts study guide
+docs/SOFTWARE_ARCHITECTURE_STYLES.md  monolith/layered/MVC/hexagonal/microservices/etc. study guide
+docs/TESTBENCH.md                    the live test bench: run, results, design, security
+CHANGELOG.md                         what changed per version
+.gitignore
+
+src/main.py                          entry point: CLI (click/scroll/capture/testbench) + launches the GUI with no args
+
+src/natural_mouse/__init__.py            public API re-exports
+src/natural_mouse/geometry.py            Point, MovementProfile (value objects)
+src/natural_mouse/automator.py           UIAutomator orchestrator class
+src/natural_mouse/screen.py              shared screen-capture helper (grab_screen)
+src/natural_mouse/capture.py             capture_region (save a screen crop as a template)
+
+src/natural_mouse/path/__init__.py
+src/natural_mouse/path/base.py           PathGenerator (abstract), Path, PathPoint
+src/natural_mouse/path/bezier.py         BezierPathGenerator (concrete)
+
+src/natural_mouse/input/__init__.py
+src/natural_mouse/input/base.py          InputExecutor (abstract)
+src/natural_mouse/input/win32_executor.py  Win32InputExecutor (concrete, ctypes/SendInput)
+src/natural_mouse/input/fake_executor.py   FakeInputExecutor (concrete, for tests)
+
+src/natural_mouse/vision/__init__.py
+src/natural_mouse/vision/base.py         ScreenLocator (abstract), Match
+src/natural_mouse/vision/template_locator.py  TemplateMatchLocator (concrete, OpenCV/mss)
+src/natural_mouse/vision/color_locator.py     ColorLocator (concrete, solid-colour blocks), parse_hex_colour
+src/natural_mouse/path/curves.py         quadratic/cubic Bezier, control_points (pure)
+src/natural_mouse/path/easing.py         linear/cosine/logistic easing (pure)
+src/natural_mouse/path/jitter.py         micro_jitter: smooth, tapered (pure)
+src/natural_mouse/path/fitts.py          FittsLaw (pure)
+src/natural_mouse/errors.py              ActionCancelled, FailSafeTriggered
+src/natural_mouse/pluggable.py           PluggableAutomator (UIAutomator + plugin hooks)
+src/natural_mouse/extensions/            RetryLocator, FallbackLocator, MultiScaleTemplateLocator, FittsPathGenerator, RecordingPathGenerator, FailSafeExecutor
+src/natural_mouse/plugins/               Plugin, PluginManager, Logging/Stats/RegionGuard/ScreenshotOnMiss plugins
+
+src/pathlab/                             path lab: stats.py (pure), render.py (OpenCV), lab.py (variants, run)
+examples/click_with_plugins.py           extensions + plugins example (--dry-run)
+LICENSE                                  MIT
+docs/MOVEMENT.md                         how a movement is made; the path lab
+docs/EXTENSIONS_AND_PLUGINS.md           extensions vs plugins (formerly mouse-ext's ARCHITECTURE)
+docs/EXTENSIONS_LEARNING.md              study guide for extensions/plugins
+docs/SECURITY.md                         threat model, RCE review, reporting
+docs/images/pathlab.png                  the path lab picture used in README/MOVEMENT
+
+src/gui/__init__.py
+src/gui/app.py                           main Tkinter window: target list, click/scroll controls
+src/gui/capture_overlay.py               full-screen drag-to-select region picker
+src/gui/targets.py                       persists the saved target list to targets.json
+
+src/testbench/__init__.py                live test bench (application, not installed)
+src/testbench/page.html                  local test page; POSTs its mouse/wheel/scroll/click/focus events
+src/testbench/server.py                  BenchServer: 127.0.0.1, token, Host check, validated events
+src/testbench/report.py                  pure: events -> MoveSummary/WheelSummary/ClickSummary, table
+src/testbench/bench.py                   run_bench: the one-shot scenario
+
+tests/__init__.py                    adds src/ to sys.path so tests can import natural_mouse/gui
+tests/test_bezier.py                 unit tests for BezierPathGenerator
+tests/test_automator.py              unit tests for UIAutomator (uses FakeInputExecutor)
+tests/test_color_locator.py          unit tests for ColorLocator (synthetic images)
+tests/test_win32_executor.py         DPI-awareness regression test (Windows only)
+tests/test_motion.py                 curves, easing, jitter, Fitts, generator combinations
+tests/test_pathlab.py                path lab measurements and a full run
+tests/test_extensions.py, test_plugins.py, ext_fakes.py   extensions/plugins (from mouse-ext)
+tests/test_testbench_report.py       unit tests for testbench/report.py
+tests/test_testbench_server.py       BenchServer over real local HTTP (token, Host, limits)
+tests/test_testbench_bench.py        the whole scenario against a FakeBrowser
+
+templates/                           user-supplied reference images for template
+                                      matching (gitignored except .gitkeep)
+```
+
+All code (`main.py`, `natural_mouse/`, `gui/`) lives under `src/` — a
+"src layout." `tests/`, `docs/`, and `templates/` are deliberately
+separate top-level siblings, not under `src/`. Run the CLI/GUI as
+`python src/main.py ...`; run tests as `python -m unittest discover -s
+tests -t .` (the `-t .` matters — see `tests/__init__.py`).
+
+## What this project is
+
+A Windows desktop-automation library: finds a UI element on screen via
+OpenCV template matching, then moves the real cursor to it along a
+human-like curved path (Bezier + easing + jitter) and clicks, or scrolls
+the mouse wheel. Built as swappable layers behind abstract base classes
+(`PathGenerator`, `InputExecutor`, `ScreenLocator`), composed by
+`UIAutomator`. `main.py` (CLI) and `gui/app.py` (Tkinter) are two
+independent front ends over that same library.
+
+This is a **manual** tool: every CLI invocation or GUI button press
+performs exactly one action and exits/returns to idle. There is no loop,
+scheduler, or unattended/background execution anywhere in this codebase,
+and none should be added — every action happens because the user
+explicitly triggered it.
+
+## Ground rules
+
+- Before answering a question about "the codebase" or making an edit,
+  check this file list first. If you need to see a file's actual content,
+  read that exact path — do not paraphrase from memory or assume standard
+  boilerplate exists (e.g. no setup.py/pyproject.toml exists yet).
+- Do not add automation that runs unattended, on a schedule, or in a loop
+  without the user explicitly asking for that specific feature by name.
+- Follow the existing pattern for new features: abstract base class in
+  `base.py`, concrete implementation in its own file, wired together only
+  in `automator.py`, `main.py`, or `gui/app.py`.

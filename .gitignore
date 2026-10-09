@@ -1,0 +1,34 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# User-supplied reference screenshots (may contain personal screen content;
+# keep the folder tracked, not its contents)
+templates/*
+!templates/.gitkeep
+
+# GUI's saved target list (user-specific runtime state, references
+# personal screenshot filenames)
+targets.json
+
+# Env/secrets
+.env
+
+# Path lab pictures (generated; re-create with `python src/main.py pathlab`)
+pathlab*.png
+!docs/images/pathlab.png
