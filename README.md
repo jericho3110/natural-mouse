@@ -295,14 +295,6 @@ category of technique used by RPA tools, accessibility software, and UI
 test automation. It has no knowledge of, or special integration with, any
 specific website or platform.
 
-It is **not** wired up to automate voting, commenting, posting, or any
-other engagement action on a social platform, and isn't intended to
-simulate account activity for the purpose of influencing a platform's trust
-or spam-detection systems. If you extend this to target a specific site,
-keep that boundary in mind — automating genuine actions you'd do anyway
-(e.g., testing your own UI) is a very different thing from automating
-engagement on a platform where other real users see the result.
-
 ## License
 
 [MIT](LICENSE).
