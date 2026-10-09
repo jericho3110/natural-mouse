@@ -90,6 +90,7 @@ URLs or starts processes, plus the full lint):
 | `ScreenshotOnMissPlugin` named files straight from the query: a colour like `#ff00ff` or text with `:`/`*`/`?` makes Windows refuse the name, and `cv2.imwrite` fails *silently* (returns `False`) while the plugin recorded the file as saved | `safe_stem()`: only letters, digits, `-`, `_`, max 60; `imwrite`'s result is checked and a failure raises `OSError` | `tests/test_screenshot_on_miss.py` |
 | `check_links.status()` would have opened any URL scheme `urllib` supports | refuses non-`http(s)` URLs | checked by hand: `file://` → "refused" |
 | the scanner ran `git` by bare name | full path via `shutil.which`; clear error if missing | Ruff S607 in the gate |
+| first CI run: pip-audit found setuptools 65.5.0 on GitHub's Python 3.10 image (PYSEC-2022-43012, PYSEC-2025-49, PYSEC-2026-1918, PYSEC-2026-3447). Not a dependency of this library (building it needs setuptools ≥ 77, in an isolated build environment) but installed on the CI machine | CI upgrades pip and setuptools before installing | the CI `pip-audit` step |
 | at display scaling > 100%, coordinates changed units mid-run (found earlier, live) | DPI awareness set when the executor is created | `tests/test_win32_executor.py` |
 
 ## Accepted risks

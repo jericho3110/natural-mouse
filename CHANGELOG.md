@@ -28,6 +28,8 @@ uses [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- CI upgrades pip and setuptools before installing: pip-audit found
+  setuptools 65.5.0 (four advisories) on the runner's Python 3.10.
 - Lint clean under the workspace's rule sets: `zip(..., strict=)` made
   explicit, shared defaults are named frozen constants.
 

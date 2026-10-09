@@ -21,6 +21,10 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+      # The runner's Python 3.10 ships setuptools 65.5.0, which has known
+      # vulnerabilities (found by pip-audit in the first CI run): upgrade
+      # the installers first, so the audit checks a current environment.
+      - run: python -m pip install --upgrade pip setuptools
       - run: python -m pip install -e ".[dev]"
       # Lint, tests, relative links, code patterns and invariants. Web
       # links are checked locally (sites rate-limit CI runners).
